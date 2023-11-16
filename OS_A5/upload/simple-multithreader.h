@@ -25,7 +25,7 @@ void *thread_func(void* ptr){
   for (int p = t->low; p < t->high; p++){
     t->lambda(p);
   }
-  return nullptr;
+  return NULL;
 }
 
 void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numThreads){
@@ -39,11 +39,11 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
     if (i == numThreads - 1){
       args[i].high += rem;
     }
-    args[i].lambda = std::move(lambda);
-    pthread_create(&tid[i], nullptr, thread_func, (&args[i]));
+    args[i].lambda = lambda;
+    pthread_create(&tid[i], NULL, thread_func, (&args[i]));
   }
   for (int i=0; i<numThreads; i++){
-    pthread_join(tid[i], nullptr);
+    pthread_join(tid[i], NULL);
   }
 }
 
