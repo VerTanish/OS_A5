@@ -13,6 +13,44 @@ void demonstration(std::function<void()> && lambda) {
   lambda();
 }
 
+typedef struct{
+  int low;
+  int high;
+  std::function<void(int)> lambda;
+
+}thread_args;
+
+void *thread_func(void* ptr){
+  thread_args * t = ((thread_args *) ptr); 
+  for (int p = t->low; p < t->high; p++){
+    t->lambda(p);
+  }
+  return nullptr;
+}
+
+void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numThreads){
+  pthread_t tid[numThreads];
+  thread_args args[numThreads];
+  int chunk = (high - low) / numThreads;
+  int rem = (high - low) % numThreads;
+  for (int i=0; i<numThreads; i++){
+    args[i].low = i*chunk;
+    args[i].high = args[i].low + chunk;
+    if (i == numThreads - 1){
+      args[i].high += rem;
+    }
+    args[i].lambda = std::move(lambda);
+    pthread_create(&tid[i], nullptr, thread_func, (&args[i]));
+  }
+  for (int i=0; i<numThreads; i++){
+    pthread_join(tid[i], nullptr);
+  }
+}
+
+void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(int, int)>  &&lambda, int numThreads){
+  
+}
+
 int main(int argc, char **argv) {
   /* 
    * Declaration of a sample C++ lambda function
@@ -34,7 +72,7 @@ int main(int argc, char **argv) {
   demonstration(lambda1); // the value of x is still 5, but the value of y is now 5
 
   int rc = user_main(argc, argv);
- 
+  
   auto /*name*/ lambda2 = [/*nothing captured*/]() {
     std::cout<<"====== Hope you enjoyed CSE231(A) ======\n";
     /* you can have any number of statements inside this lambda body */
