@@ -59,14 +59,16 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
     }
   }
   else{
+    int flag = 0;
     pthread_t tid[numThreads];
     thread_args args[numThreads];
     int chunk = (high - low) / numThreads;
-    if (numThreads > (high - low)){
-      numThreads = high - low;
-      chunk = (high - low) / numThreads;
-    }
     int rem = (high - low) % numThreads;
+    if (numThreads > (high - low)){
+      chunk = 1;
+      rem = 0;
+      flag = 1;
+    }
     for (int i=0; i<numThreads; i++){
       args[i].low = i*chunk;
       args[i].high = args[i].low + chunk;
@@ -74,6 +76,11 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
         args[i].high += rem;
       }
       args[i].lambda = lambda;
+      if (flag == 1 && i >= (high - low)){
+        args[i].low = 0;
+        args[i].high = 0;
+        args[i].lambda = lambda;
+      }
       if (pthread_create(&tid[i], NULL, thread_func, (&args[i])) != 0){
         perror("Error: pthread_create");
       }
@@ -102,6 +109,7 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
     }
   }
   else{
+    int flag = 0;
     pthread_t tid[numThreads];
     thread_args_12 args[numThreads];
     int chunk1 = (high1 - low1) / numThreads;
@@ -110,6 +118,11 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
       chunk1 = (high1 - low1) / numThreads;
     }
     int rem1 = (high1 - low1) % numThreads;
+    if (numThreads > (high1 - low1)){
+      chunk1 = 1;
+      rem1 = 0;
+      flag = 1;
+    }
     for (int i=0; i<numThreads; i++){
       args[i].low1 = i*chunk1;
       args[i].high1 = args[i].low1 + chunk1;
@@ -119,6 +132,13 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
         args[i].high1 += rem1;
       }
       args[i].lambda = lambda;
+      if (flag == 1 && i >= (high1 - low1)){
+        args[i].low1 = 0;
+        args[i].high1 = 0;
+        args[i].low2 = 0;
+        args[i].high2 = 0;
+        args[i].lambda = lambda;
+      }
       if (pthread_create(&tid[i], NULL, thread_func_12, (&args[i])) != 0){
         perror("Error: pthread_create");
       }
