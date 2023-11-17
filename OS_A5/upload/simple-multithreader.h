@@ -40,13 +40,13 @@ void *thread_func(void* ptr){
 void *thread_func_12(void* ptr){
   thread_args_12 * t = ((thread_args_12 *) ptr); 
   for (int p = t->low1; p < t->high1; p++){
-    for (int j = t->low2; p < t->high2; j++){
-      printf("huh");
+    for (int j = t->low2; j < t->high2; j++){
       t->lambda(p,j);
     }
   }
   return NULL;
 }
+
 
 void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numThreads){
   pthread_t tid[numThreads];
@@ -70,11 +70,8 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
 void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(int, int)>  &&lambda, int numThreads){
   pthread_t tid[numThreads];
   thread_args_12 args[numThreads];
-  int size = high2 - low2;
   int chunk1 = (high1 - low1) / numThreads;
-  // int chunk2 = size;
   int rem1 = (high1 - low1) % numThreads;
-  // int rem2 = (high2 - low2) % numThreads;
   for (int i=0; i<numThreads; i++){
     args[i].low1 = i*chunk1;
     args[i].high1 = args[i].low1 + chunk1;
@@ -82,7 +79,6 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
     args[i].high2 = high2;
     if (i == numThreads - 1){
       args[i].high1 += rem1;
-      // args[i].high2 += rem2;
     }
     args[i].lambda = lambda;
     pthread_create(&tid[i], NULL, thread_func_12, (&args[i]));
