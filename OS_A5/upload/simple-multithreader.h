@@ -53,21 +53,28 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
   std::chrono::time_point<std::chrono::steady_clock> start;
   start = std::chrono::steady_clock::now();
   std::chrono::time_point<std::chrono::steady_clock> end;
-  pthread_t tid[numThreads];
-  thread_args args[numThreads];
-  int chunk = (high - low) / numThreads;
-  int rem = (high - low) % numThreads;
-  for (int i=0; i<numThreads; i++){
-    args[i].low = i*chunk;
-    args[i].high = args[i].low + chunk;
-    if (i == numThreads - 1){
-      args[i].high += rem;
+  if (high - low < 1024){
+    for (int i = low; i < high; i++){
+      lambda(i);
     }
-    args[i].lambda = lambda;
-    pthread_create(&tid[i], NULL, thread_func, (&args[i]));
   }
-  for (int i=0; i<numThreads; i++){
-    pthread_join(tid[i], NULL);
+  else{
+    pthread_t tid[numThreads];
+    thread_args args[numThreads];
+    int chunk = (high - low) / numThreads;
+    int rem = (high - low) % numThreads;
+    for (int i=0; i<numThreads; i++){
+      args[i].low = i*chunk;
+      args[i].high = args[i].low + chunk;
+      if (i == numThreads - 1){
+        args[i].high += rem;
+      }
+      args[i].lambda = lambda;
+      pthread_create(&tid[i], NULL, thread_func, (&args[i]));
+    }
+    for (int i=0; i<numThreads; i++){
+      pthread_join(tid[i], NULL);
+    }
   }
   end = std::chrono::steady_clock::now();
   const std::chrono::duration<double> elapsed_seconds{end - start};
@@ -79,24 +86,33 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
   std::chrono::time_point<std::chrono::steady_clock> start;
   start = std::chrono::steady_clock::now();
   std::chrono::time_point<std::chrono::steady_clock> end;
-  pthread_t tid[numThreads];
-  thread_args_12 args[numThreads];
-  int chunk1 = (high1 - low1) / numThreads;
-  int rem1 = (high1 - low1) % numThreads;
-  for (int i=0; i<numThreads; i++){
-    args[i].low1 = i*chunk1;
-    args[i].high1 = args[i].low1 + chunk1;
-    args[i].low2 = low2;
-    args[i].high2 = high2;
-    if (i == numThreads - 1){
-      args[i].high1 += rem1;
+  if (high1 - low1 < 16 && high2 - low2 < 16){
+    for (int i=low1; i<high1; i++){
+      for (int j=low2; j<high2; j++){
+        lambda(i,j);
+      }
     }
-    args[i].lambda = lambda;
-    pthread_create(&tid[i], NULL, thread_func_12, (&args[i]));
   }
-  for (int i=0; i<numThreads; i++){
-    pthread_join(tid[i], NULL);
-  }  
+  else{
+    pthread_t tid[numThreads];
+    thread_args_12 args[numThreads];
+    int chunk1 = (high1 - low1) / numThreads;
+    int rem1 = (high1 - low1) % numThreads;
+    for (int i=0; i<numThreads; i++){
+      args[i].low1 = i*chunk1;
+      args[i].high1 = args[i].low1 + chunk1;
+      args[i].low2 = low2;
+      args[i].high2 = high2;
+      if (i == numThreads - 1){
+        args[i].high1 += rem1;
+      }
+      args[i].lambda = lambda;
+      pthread_create(&tid[i], NULL, thread_func_12, (&args[i]));
+    }
+    for (int i=0; i<numThreads; i++){
+      pthread_join(tid[i], NULL);
+    }
+  }
   end = std::chrono::steady_clock::now();
   const std::chrono::duration<double> elapsed_seconds{end - start};
   std::cout << "parallel_for execution time: ";
