@@ -62,4 +62,4 @@ Total time taken by each parallel_for is printed whenever a parallel_for gets ex
 #Contributions-
 Tanish Verma (2022532)- thread_func_12, parallel_for(dual ranges), parallel_for(single range), documentation
 Kirti Jain(2022250)-thread_func, parallel_for(single range), documentation
-Repo link- https://github.com/VerTanish/OS_A5/blob/main/OS_A5/upload/simple-multithreader.h
+Repo link- https://github.com/VerTanish/OS_A5/

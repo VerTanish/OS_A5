@@ -13,14 +13,16 @@ int user_main(int argc, char **argv);
 void demonstration(std::function<void()> && lambda) {
   lambda();
 }
-
-typedef struct{
+//creating structs in order to pass the arguments as a single pointer
+//struct for parallel_for with signature containing <void(int)> lambda
+typedef struct{ 
   int low;
   int high;
   std::function<void(int)> lambda;
 
 }thread_args;
 
+//struct for parallel_for with signature containing <void(int,int)> lambda
 typedef struct{
   int low1;
   int high1;
@@ -29,7 +31,7 @@ typedef struct{
   std::function<void(int,int)> lambda;
 }thread_args_12;
 
-
+//functions which get called by the pthread_create, for both parallel_for signatures
 void *thread_func(void* ptr){
   thread_args * t = ((thread_args *) ptr); 
   for (int p = t->low; p < t->high; p++){
@@ -48,7 +50,8 @@ void *thread_func_12(void* ptr){
   return NULL;
 }
 
-
+//parallel_for function for the vector type programs
+//Overflow condition handled to ensure load on one thread doesn't occur
 void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numThreads){
   std::chrono::time_point<std::chrono::steady_clock> start;
   start = std::chrono::steady_clock::now();
@@ -97,6 +100,8 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
   std::cout << elapsed_seconds.count() << "s\n";
 }
 
+//parallel_for function for the matrix type programs
+//Overflow condition handled to ensure load on one thread doesn't occur
 void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(int, int)>  &&lambda, int numThreads){
   std::chrono::time_point<std::chrono::steady_clock> start;
   start = std::chrono::steady_clock::now();
