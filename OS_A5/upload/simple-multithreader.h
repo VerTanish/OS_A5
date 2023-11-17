@@ -70,10 +70,14 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
         args[i].high += rem;
       }
       args[i].lambda = lambda;
-      pthread_create(&tid[i], NULL, thread_func, (&args[i]));
+      if (pthread_create(&tid[i], NULL, thread_func, (&args[i])) != 0){
+        perror("Error: pthread_create");
+      }
     }
     for (int i=0; i<numThreads; i++){
-      pthread_join(tid[i], NULL);
+      if (pthread_join(tid[i], NULL) != 0){
+        perror("Error: pthread_join");
+      }
     }
   }
   end = std::chrono::steady_clock::now();
@@ -107,10 +111,14 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
         args[i].high1 += rem1;
       }
       args[i].lambda = lambda;
-      pthread_create(&tid[i], NULL, thread_func_12, (&args[i]));
+      if (pthread_create(&tid[i], NULL, thread_func_12, (&args[i])) != 0){
+        perror("Error: pthread_create");
+      }
     }
     for (int i=0; i<numThreads; i++){
-      pthread_join(tid[i], NULL);
+      if (pthread_join(tid[i], NULL) != 0){
+        perror("Error: pthread_join");
+      }
     }
   }
   end = std::chrono::steady_clock::now();
