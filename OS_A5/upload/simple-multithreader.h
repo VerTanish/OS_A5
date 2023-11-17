@@ -62,6 +62,10 @@ void parallel_for(int low, int high, std::function<void(int)> &&lambda, int numT
     pthread_t tid[numThreads];
     thread_args args[numThreads];
     int chunk = (high - low) / numThreads;
+    if (numThreads > (high - low)){
+      numThreads = high - low;
+      chunk = (high - low) / numThreads;
+    }
     int rem = (high - low) % numThreads;
     for (int i=0; i<numThreads; i++){
       args[i].low = i*chunk;
@@ -101,6 +105,10 @@ void parallel_for(int low1, int high1,  int low2, int high2, std::function<void(
     pthread_t tid[numThreads];
     thread_args_12 args[numThreads];
     int chunk1 = (high1 - low1) / numThreads;
+    if (numThreads > high1 - low1){
+      numThreads = high1 - low1;
+      chunk1 = (high1 - low1) / numThreads;
+    }
     int rem1 = (high1 - low1) % numThreads;
     for (int i=0; i<numThreads; i++){
       args[i].low1 = i*chunk1;
